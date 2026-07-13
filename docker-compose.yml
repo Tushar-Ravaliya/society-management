@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: society-management-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: society_management
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: society-management-server
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_password@db:5432/society_management
+      - PORT=3000
+    depends_on:
+      - db
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: society-management-client
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:
