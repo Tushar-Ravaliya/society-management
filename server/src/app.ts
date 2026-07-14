@@ -6,6 +6,8 @@ import committeeRoutes from "./routes/committee.route";
 import announcementRoutes from "./routes/announcement.route";
 import complaintRoutes from "./routes/complaint.route";
 import serviceRequestRoutes from "./routes/service-request.route";
+import billingRoutes from "./routes/billing.route";
+import paymentRoutes from "./routes/payment.route";
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
@@ -19,6 +21,8 @@ app.use("/api/committee", committeeRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/service-requests", serviceRequestRoutes);
+app.use("/api/billing", billingRoutes);
+app.use("/api/payments", paymentRoutes);
 
 app.get("/", async (req, res) => {
   res.send("Hello World");

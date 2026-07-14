@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, pgEnum, timestamp, boolean, integer, text } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, pgEnum, timestamp, boolean, integer, text, numeric } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", ["admin", "committee", "resident"]);
 export const userStatusEnum = pgEnum("user_status", ["pending", "active", "inactive"]);
@@ -107,6 +107,44 @@ export const serviceRequests = pgTable("service_requests", {
   raisedById: uuid("raised_by_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   adminRemarks: text("admin_remarks"),
   completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const billStatusEnum = pgEnum("bill_status", ["unpaid", "paid", "partially_paid", "overdue"]);
+
+export const maintenanceBills = pgTable("maintenance_bills", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  unitId: uuid("unit_id").references(() => units.id, { onDelete: "restrict" }).notNull(),
+  billNumber: varchar("bill_number", { length: 100 }).notNull().unique(),
+  billingPeriod: varchar("billing_period", { length: 50 }).notNull(),
+  maintenanceAmount: numeric("maintenance_amount", { precision: 10, scale: 2 }).notNull(),
+  waterAmount: numeric("water_amount", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  electricityAmount: numeric("electricity_amount", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  penaltyAmount: numeric("penalty_amount", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  otherAmount: numeric("other_amount", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: billStatusEnum("status").default("unpaid").notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const paymentMethodEnum = pgEnum("payment_method", ["online", "cash", "bank_transfer", "cheque"]);
+export const paymentStatusEnum = pgEnum("payment_status", ["pending", "verified", "failed"]);
+
+export const payments = pgTable("payments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  billId: uuid("bill_id").references(() => maintenanceBills.id, { onDelete: "restrict" }).notNull(),
+  residentId: uuid("resident_id").references(() => users.id, { onDelete: "restrict" }).notNull(),
+  paymentMethod: paymentMethodEnum("payment_method").notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  transactionReference: varchar("transaction_reference", { length: 255 }).notNull().unique(),
+  paymentDate: timestamp("payment_date").defaultNow().notNull(),
+  status: paymentStatusEnum("status").default("pending").notNull(),
+  verifiedById: uuid("verified_by_id").references(() => users.id, { onDelete: "set null" }),
+  verificationNotes: varchar("verification_notes", { length: 255 }),
+  verifiedAt: timestamp("verified_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

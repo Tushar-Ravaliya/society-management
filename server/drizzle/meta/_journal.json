@@ -43,6 +43,13 @@
       "when": 1784008652250,
       "tag": "0005_daily_lady_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784010360644,
+      "tag": "0006_tired_sabretooth",
+      "breakpoints": true
     }
   ]
 }
