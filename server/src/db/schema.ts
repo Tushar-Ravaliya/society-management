@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, pgEnum, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, pgEnum, timestamp, boolean, integer, text } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", ["admin", "committee", "resident"]);
 export const userStatusEnum = pgEnum("user_status", ["pending", "active", "inactive"]);
@@ -56,6 +56,20 @@ export const committeeMembers = pgTable("committee_members", {
   termStart: timestamp("term_start").notNull(),
   termEnd: timestamp("term_end").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const announcementAudienceEnum = pgEnum("announcement_audience", ["all", "residents", "committee"]);
+
+export const announcements = pgTable("announcements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  audience: announcementAudienceEnum("audience").default("all").notNull(),
+  publishedById: uuid("published_by_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  isPinned: boolean("is_pinned").default(false).notNull(),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
