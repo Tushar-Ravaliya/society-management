@@ -9,13 +9,29 @@ if (!process.env.DATABASE_URL) {
 if (!process.env.PORT) {
   throw new Error("PORT is not defined");
 }
+if (!process.env.JWT_ACCESS_SECRET) {
+  throw new Error("JWT_ACCESS_SECRET is not defined");
+}
+if (!process.env.JWT_REFRESH_SECRET) {
+  throw new Error("JWT_REFRESH_SECRET is not defined");
+}
 
-const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "default_access_secret_123";
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "default_refresh_secret_543";
+if (!process.env.IMAGEKIT_PUBLIC_KEY) {
+  throw new Error("IMAGEKIT_PUBLIC_KEY is not defined");
+}
+if (!process.env.IMAGEKIT_PRIVATE_KEY) {
+  throw new Error("IMAGEKIT_PRIVATE_KEY is not defined");
+}
+if (!process.env.IMAGEKIT_URL_ENDPOINT) {
+  throw new Error("IMAGEKIT_URL_ENDPOINT is not defined");
+}
 
 export const config = {
-  DATABASE_URL: process.env.DATABASE_URL,
-  PORT: process.env.PORT,
-  JWT_ACCESS_SECRET,
-  JWT_REFRESH_SECRET,
+  DATABASE_URL: process.env.DATABASE_URL!,
+  PORT: Number(process.env.PORT),
+  JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET!,
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET!,
+  IMAGEKIT_PUBLIC_KEY: process.env.IMAGEKIT_PUBLIC_KEY!,
+  IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY!,
+  IMAGEKIT_URL_ENDPOINT: process.env.IMAGEKIT_URL_ENDPOINT!,
 };

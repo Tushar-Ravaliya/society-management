@@ -73,3 +73,23 @@ export const announcements = pgTable("announcements", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const complaintStatusEnum = pgEnum("complaint_status", ["pending", "assigned", "resolved", "rejected"]);
+export const complaintPriorityEnum = pgEnum("complaint_priority", ["low", "medium", "high"]);
+
+export const complaints = pgTable("complaints", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  category: varchar("category", { length: 100 }).notNull(),
+  status: complaintStatusEnum("status").default("pending").notNull(),
+  priority: complaintPriorityEnum("priority").default("medium").notNull(),
+  imageUrl: varchar("image_url", { length: 500 }),
+  imageFileId: varchar("image_file_id", { length: 255 }),
+  raisedById: uuid("raised_by_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  assignedToId: uuid("assigned_to_id").references(() => users.id, { onDelete: "set null" }),
+  resolutionDetails: text("resolution_details"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

@@ -37,15 +37,18 @@ export function errorHandler(
   }
 
   // Handle Zod ValidationError
-  if (err instanceof ZodError) {
+  if (err instanceof ZodError || err.name === "ZodError") {
+    const issues = err.issues || err.errors || [];
     res.status(400).json({
       success: false,
       error: {
         message: "Validation failed",
-        details: err.errors.map((e) => ({
-          field: e.path.join("."),
-          message: e.message,
-        })),
+        details: Array.isArray(issues)
+          ? issues.map((e: any) => ({
+              field: e.path ? e.path.join(".") : "",
+              message: e.message || "Invalid value",
+            }))
+          : [],
       },
     });
     return;

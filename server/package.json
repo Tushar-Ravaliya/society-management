@@ -12,6 +12,7 @@
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
     "drizzle-kit": "^0.31.10"
   },
   "peerDependencies": {
@@ -24,7 +25,9 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
+    "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
     "postgres": "^3.4.9",
     "zod": "^4.4.3"
   }
