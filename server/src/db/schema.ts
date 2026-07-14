@@ -48,3 +48,14 @@ export const residentProfiles = pgTable("resident_profiles", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const committeeMembers = pgTable("committee_members", {
+  id: uuid("id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  designation: varchar("designation", { length: 100 }).notNull(),
+  portfolio: varchar("portfolio", { length: 255 }).notNull(),
+  termStart: timestamp("term_start").notNull(),
+  termEnd: timestamp("term_end").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

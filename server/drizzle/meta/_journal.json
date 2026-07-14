@@ -15,6 +15,13 @@
       "when": 1784002038671,
       "tag": "0001_adorable_roulette",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784002997071,
+      "tag": "0002_sharp_post",
+      "breakpoints": true
     }
   ]
 }
