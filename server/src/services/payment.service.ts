@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { db } from "../db/db";
 import { users, maintenanceBills, payments } from "../db/schema";
+import { AuditService } from "./audit.service";
 import { config } from "../config/config";
 import { AppError } from "../middlewares/errorHandler";
 
@@ -167,7 +168,7 @@ export class PaymentService {
     }
 
     // 4. Atomically insert payment as verified and update bill to paid
-    return await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       const [payment] = await tx
         .insert(payments)
         .values({
@@ -194,6 +195,16 @@ export class PaymentService {
         billStatus: "paid",
       };
     });
+
+    await AuditService.writeAuditLog({
+      actorId: residentId,
+      action: "PAYMENT_VERIFIED",
+      module: "payments",
+      targetId: result.payment.id,
+      description: `Online Razorpay payment verified for bill ${bill.billNumber} (Amt: ${bill.totalAmount}).`,
+    });
+
+    return result;
   }
 
   // Admin approves/rejects offline payment claim
@@ -221,7 +232,7 @@ export class PaymentService {
       throw new AppError(`This payment is already processed as '${payment.status}'`, 400);
     }
 
-    return await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       // Update payment
       const [updatedPayment] = await tx
         .update(payments)
@@ -254,6 +265,18 @@ export class PaymentService {
         billStatus,
       };
     });
+
+    await AuditService.writeAuditLog({
+      actorId: adminId,
+      action: data.status === "verified" ? "PAYMENT_VERIFIED" : "PAYMENT_REJECTED",
+      module: "payments",
+      targetId: result.payment.id,
+      description: data.status === "verified"
+        ? `Admin verified offline payment ${payment.transactionReference} (Amt: ${payment.amount}).`
+        : `Admin rejected offline payment ${payment.transactionReference} (Amt: ${payment.amount}).`,
+    });
+
+    return result;
   }
 
   // Fetch payments feed (scoped by user role)
