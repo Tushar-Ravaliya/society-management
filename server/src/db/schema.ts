@@ -93,3 +93,20 @@ export const complaints = pgTable("complaints", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const serviceRequestStatusEnum = pgEnum("service_request_status", ["pending", "approved", "rejected", "completed"]);
+export const serviceRequestTypeEnum = pgEnum("service_request_type", ["noc", "clubhouse_booking", "renovation_permission", "parking_allocation", "other"]);
+
+export const serviceRequests = pgTable("service_requests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  requestType: serviceRequestTypeEnum("request_type").notNull(),
+  status: serviceRequestStatusEnum("status").default("pending").notNull(),
+  preferredDate: timestamp("preferred_date"),
+  raisedById: uuid("raised_by_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  adminRemarks: text("admin_remarks"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

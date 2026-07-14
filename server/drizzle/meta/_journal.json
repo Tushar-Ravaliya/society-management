@@ -36,6 +36,13 @@
       "when": 1784007083716,
       "tag": "0004_greedy_madame_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784008652250,
+      "tag": "0005_daily_lady_mastermind",
+      "breakpoints": true
     }
   ]
 }
