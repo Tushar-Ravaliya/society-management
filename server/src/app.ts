@@ -8,6 +8,9 @@ import complaintRoutes from "./routes/complaint.route";
 import serviceRequestRoutes from "./routes/service-request.route";
 import billingRoutes from "./routes/billing.route";
 import paymentRoutes from "./routes/payment.route";
+import dashboardRoutes from "./routes/dashboard.route";
+import reportRoutes from "./routes/report.route";
+import auditRoutes from "./routes/audit.route";
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
@@ -23,6 +26,9 @@ app.use("/api/complaints", complaintRoutes);
 app.use("/api/service-requests", serviceRequestRoutes);
 app.use("/api/billing", billingRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/admin/audit-logs", auditRoutes);
 
 app.get("/", async (req, res) => {
   res.send("Hello World");

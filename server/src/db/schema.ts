@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, pgEnum, timestamp, boolean, integer, text, numeric } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, pgEnum, timestamp, boolean, integer, text, numeric, jsonb } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", ["admin", "committee", "resident"]);
 export const userStatusEnum = pgEnum("user_status", ["pending", "active", "inactive"]);
@@ -147,4 +147,17 @@ export const payments = pgTable("payments", {
   verifiedAt: timestamp("verified_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const auditLogs = pgTable("audit_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
+  action: varchar("action", { length: 100 }).notNull(),
+  module: varchar("module", { length: 100 }).notNull(),
+  targetId: uuid("target_id"),
+  description: text("description").notNull(),
+  metadata: jsonb("metadata"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: varchar("user_agent", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

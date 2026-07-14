@@ -13,14 +13,21 @@ export class BillingController {
     next: NextFunction
   ): Promise<void> {
     try {
+      if (!req.user) {
+        throw new AppError("Authentication required", 401);
+      }
+
       const { billingPeriod, dueDate, defaultMaintenance, defaultWater, defaultElectricity } = req.body;
-      const result = await BillingService.generateBatchBills({
-        billingPeriod,
-        dueDate: new Date(dueDate),
-        defaultMaintenance,
-        defaultWater,
-        defaultElectricity,
-      });
+      const result = await BillingService.generateBatchBills(
+        {
+          billingPeriod,
+          dueDate: new Date(dueDate),
+          defaultMaintenance,
+          defaultWater,
+          defaultElectricity,
+        },
+        req.user.id
+      );
 
       res.status(200).json({
         success: true,

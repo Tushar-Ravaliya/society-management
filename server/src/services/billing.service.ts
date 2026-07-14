@@ -1,17 +1,21 @@
 import { eq, and, sql, desc } from "drizzle-orm";
 import { db } from "../db/db";
 import { units, maintenanceBills } from "../db/schema";
+import { AuditService } from "./audit.service";
 import { AppError } from "../middlewares/errorHandler";
 
 export class BillingService {
   // Generate batch bills for all occupied units
-  public static async generateBatchBills(data: {
-    billingPeriod: string;
-    dueDate: Date;
-    defaultMaintenance: number;
-    defaultWater: number;
-    defaultElectricity: number;
-  }): Promise<{ count: number }> {
+  public static async generateBatchBills(
+    data: {
+      billingPeriod: string;
+      dueDate: Date;
+      defaultMaintenance: number;
+      defaultWater: number;
+      defaultElectricity: number;
+    },
+    adminId?: string
+  ): Promise<{ count: number }> {
     // 1. Get all occupied units
     const occupiedUnits = await db
       .select()
@@ -62,6 +66,13 @@ export class BillingService {
 
       generatedCount++;
     }
+
+    await AuditService.writeAuditLog({
+      actorId: adminId,
+      action: "BILL_GENERATED",
+      module: "billing",
+      description: `Generated ${generatedCount} maintenance bills for period ${data.billingPeriod}.`,
+    });
 
     return { count: generatedCount };
   }
