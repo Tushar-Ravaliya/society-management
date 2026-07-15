@@ -5,8 +5,10 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 
 // Pages
+import { LoginPage } from '../features/auth/pages/LoginPage';
+import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { 
-  LoginPage, RegisterPage, DashboardPage, ResidentsPage, OnboardResidentPage,
+  RegisterPage, ResidentsPage, OnboardResidentPage,
   UnitsPage, CreateUnitPage, CommitteePage, AssignCommitteePage, AnnouncementsPage,
   CreateAnnouncementPage, ComplaintsPage, LodgeComplaintPage, ComplaintDetailPage,
   ServiceRequestsPage, RaiseRequestPage, RequestDetailPage, BillsPage, GenerateBillsPage,
