@@ -96,7 +96,10 @@ export class ResidentService {
     const nextBlock = data.block ?? currentUnit.block;
     const nextFlatNumber = data.flatNumber ?? currentUnit.flatNumber;
 
-    if (data.block || data.flatNumber) {
+    const isFlatIdentityChanged =
+      nextBlock !== currentUnit.block || nextFlatNumber !== currentUnit.flatNumber;
+
+    if (isFlatIdentityChanged) {
       const duplicate = await db
         .select()
         .from(units)

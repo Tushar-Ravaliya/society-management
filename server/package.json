@@ -1,8 +1,9 @@
 {
   "name": "server",
   "scripts": {
-    "start": "bun run drizzle-kit push && bun run index.ts",
-    "dev": "bun run drizzle-kit push && bun --watch index.ts",
+    "start": "bun run index.ts",
+    "dev": "bun --watch index.ts",
+    "db:push": "bun run drizzle-kit push",
     "seed": "bun run src/db/seed.ts"
   },
   "module": "index.ts",
