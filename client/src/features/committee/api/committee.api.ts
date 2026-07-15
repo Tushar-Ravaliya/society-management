@@ -4,7 +4,7 @@ import type { ApiResponse } from '../../../types/common.types';
 
 export const committeeApi = {
   getMembers: (activeOnly?: boolean) =>
-    api.get<ApiResponse<CommitteeMember[]>>('/committee', { params: { activeOnly } }),
+    api.get<ApiResponse<{ committee: CommitteeMember[] }>>('/committee', { params: { activeOnly } }),
 
   assign: (data: AssignCommitteeMemberPayload) =>
     api.post<ApiResponse<{ member: CommitteeMember }>>('/committee', data),

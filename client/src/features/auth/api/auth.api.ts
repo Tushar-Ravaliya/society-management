@@ -14,4 +14,6 @@ export const authApi = {
   logout: () => api.post<ApiResponse<{ message: string }>>("/auth/logout"),
 
   me: () => api.get<ApiResponse<{ user: User }>>("/auth/me"),
+
+  getUsers: () => api.get<ApiResponse<{ users: User[] }>>("/auth/users"),
 };

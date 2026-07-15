@@ -199,4 +199,22 @@ export class AuthService {
       .set({ isRevoked: true })
       .where(eq(refreshTokens.token, token));
   }
+
+  // Get simplified list of all active residents (eligible for committee assignment)
+  public static async getAllUsers() {
+    return await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+      })
+      .from(users)
+      .where(
+        and(
+          eq(users.status, "active"),
+          eq(users.role, "resident")
+        )
+      );
+  }
 }

@@ -208,4 +208,23 @@ export class AuthController {
       next(error);
     }
   }
+
+  // GET /api/auth/users
+  public static async getUsers(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const usersList = await AuthService.getAllUsers();
+      res.status(200).json({
+        success: true,
+        data: {
+          users: usersList,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
