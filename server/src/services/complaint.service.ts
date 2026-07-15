@@ -239,4 +239,53 @@ export class ComplaintService {
       },
     };
   }
+
+  // Get complaint by ID
+  public static async getComplaintById(id: string, userId: string, userRole: string) {
+    const raiser = alias(users, "raiser");
+    const assignee = alias(users, "assignee");
+
+    const query = db
+      .select({
+        id: complaints.id,
+        title: complaints.title,
+        description: complaints.description,
+        category: complaints.category,
+        status: complaints.status,
+        priority: complaints.priority,
+        imageUrl: complaints.imageUrl,
+        resolutionDetails: complaints.resolutionDetails,
+        resolvedAt: complaints.resolvedAt,
+        createdAt: complaints.createdAt,
+        raisedBy: {
+          id: raiser.id,
+          name: raiser.name,
+          email: raiser.email,
+        },
+        assignedTo: {
+          id: assignee.id,
+          name: assignee.name,
+          email: assignee.email,
+        },
+      })
+      .from(complaints)
+      .innerJoin(raiser, eq(complaints.raisedById, raiser.id))
+      .leftJoin(assignee, eq(complaints.assignedToId, assignee.id))
+      .where(eq(complaints.id, id))
+      .limit(1);
+
+    const results = await query;
+    if (results.length === 0) {
+      throw new AppError("Complaint not found", 404);
+    }
+
+    const complaint = results[0];
+
+    // Role-based scoping: resident can only see their own complaints
+    if (userRole === "resident" && complaint.raisedBy.id !== userId) {
+      throw new AppError("You are not authorized to view this complaint", 403);
+    }
+
+    return complaint;
+  }
 }

@@ -127,4 +127,31 @@ export class ComplaintController {
       next(error);
     }
   }
+
+  // GET /api/complaints/:id
+  public static async getComplaintById(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError("Authentication required", 401);
+      }
+
+      const { id } = req.params;
+      const complaint = await ComplaintService.getComplaintById(
+        id,
+        req.user.id,
+        req.user.role
+      );
+
+      res.status(200).json({
+        success: true,
+        data: { complaint },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

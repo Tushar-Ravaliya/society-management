@@ -16,11 +16,23 @@ import { AssignCommitteePage } from '../features/committee/pages/AssignCommittee
 import { AnnouncementsPage } from '../features/announcements/pages/AnnouncementsPage';
 import { CreateAnnouncementPage } from '../features/announcements/pages/CreateAnnouncementPage';
 
-import { 
-  RegisterPage, ComplaintsPage, LodgeComplaintPage, ComplaintDetailPage,
-  ServiceRequestsPage, RaiseRequestPage, RequestDetailPage, BillsPage, GenerateBillsPage,
-  BillDetailPage, MyBillsPage, PaymentsPage, MakePaymentPage, DefaultersPage, AuditLogsPage
-} from '../pages';
+import { ComplaintsPage } from '../features/complaints/pages/ComplaintsPage';
+import { LodgeComplaintPage } from '../features/complaints/pages/LodgeComplaintPage';
+import { ComplaintDetailPage } from '../features/complaints/pages/ComplaintDetailPage';
+import { ServiceRequestsPage } from '../features/service-requests/pages/ServiceRequestsPage';
+import { RaiseRequestPage } from '../features/service-requests/pages/RaiseRequestPage';
+import { RequestDetailPage } from '../features/service-requests/pages/RequestDetailPage';
+
+import { RegisterPage } from '../pages'; // Keeping RegisterPage from pages if it was not created in auth yet, but let's assume I create it or import it. Wait, the user didn't explicitly ask for RegisterPage but I will import what I just made.
+import { BillsPage } from '../features/billing/pages/BillsPage';
+import { GenerateBillsPage } from '../features/billing/pages/GenerateBillsPage';
+import { BillDetailPage } from '../features/billing/pages/BillDetailPage';
+import { MyBillsPage } from '../features/billing/pages/MyBillsPage';
+import { PaymentsPage } from '../features/payments/pages/PaymentsPage';
+import { MakePaymentPage } from '../features/payments/pages/MakePaymentPage';
+import { DefaultersPage } from '../features/reports/pages/DefaultersPage';
+import { AuditLogsPage } from '../features/audit/pages/AuditLogsPage';
+import { NotFoundPage } from '../features/auth/pages/NotFoundPage';
 
 export const router = createBrowserRouter([
   {
@@ -89,5 +101,9 @@ export const router = createBrowserRouter([
         ]
       }
     ]
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />
   }
 ]);

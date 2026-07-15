@@ -26,4 +26,11 @@ router.get(
   BillingController.getBillById
 );
 
+router.get(
+  "/",
+  authenticate,
+  requireRoles(["admin"]),
+  BillingController.getAllBills
+);
+
 export default router;

@@ -23,6 +23,7 @@ export const LoginForm: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginPayload>({
     resolver: zodResolver(loginSchema),
@@ -68,6 +69,48 @@ export const LoginForm: React.FC = () => {
         <Link to="/register" className="text-primary hover:underline font-medium">
           Register
         </Link>
+      </div>
+
+      <div className="mt-8 border-t border-orchid/10 pt-6">
+        <p className="text-xs text-charcoal-muted text-center mb-3 uppercase tracking-wider font-semibold">Quick Login (Demo)</p>
+        <div className="grid grid-cols-3 gap-2">
+          <Button 
+            type="button" 
+            variant="secondary" 
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              setValue('email', 'admin@society.com');
+              setValue('password', 'Password@123');
+            }}
+          >
+            Admin
+          </Button>
+          <Button 
+            type="button" 
+            variant="secondary" 
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              setValue('email', 'committee@society.com');
+              setValue('password', 'Password@123');
+            }}
+          >
+            Committee
+          </Button>
+          <Button 
+            type="button" 
+            variant="secondary" 
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              setValue('email', 'john@society.com');
+              setValue('password', 'Password@123');
+            }}
+          >
+            Resident
+          </Button>
+        </div>
       </div>
     </form>
   );

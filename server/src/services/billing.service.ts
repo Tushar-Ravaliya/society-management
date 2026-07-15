@@ -78,8 +78,10 @@ export class BillingService {
   }
 
   // Get bills for a specific unit
-  public static async getUnitBills(unitId: string): Promise<any[]> {
-    return await db
+  public static async getUnitBills(unitId: string, page: number = 1, limit: number = 10) {
+    const offset = (page - 1) * limit;
+    
+    const query = db
       .select({
         id: maintenanceBills.id,
         billNumber: maintenanceBills.billNumber,
@@ -92,10 +94,37 @@ export class BillingService {
         totalAmount: maintenanceBills.totalAmount,
         status: maintenanceBills.status,
         dueDate: maintenanceBills.dueDate,
+        unit: {
+          block: units.block,
+          flatNumber: units.flatNumber,
+        },
       })
       .from(maintenanceBills)
+      .innerJoin(units, eq(maintenanceBills.unitId, units.id))
       .where(eq(maintenanceBills.unitId, unitId))
-      .orderBy(desc(maintenanceBills.createdAt));
+      .orderBy(desc(maintenanceBills.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const countQuery = db
+      .select({ count: sql<number>`count(*)` })
+      .from(maintenanceBills)
+      .where(eq(maintenanceBills.unitId, unitId));
+
+    const [results, countResult] = await Promise.all([query, countQuery]);
+    
+    const total = Number(countResult[0]?.count || 0);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      bills: results,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    };
   }
 
   // Get specific bill by ID
@@ -128,5 +157,75 @@ export class BillingService {
     }
 
     return records[0];
+  }
+
+  // Get all bills (Admin)
+  public static async getAllBills(
+    filters: {
+      status?: "unpaid" | "paid" | "partially_paid" | "overdue";
+      billingPeriod?: string;
+      page: number;
+      limit: number;
+    }
+  ) {
+    const page = Math.max(1, filters.page);
+    const limit = Math.max(1, filters.limit);
+    const offset = (page - 1) * limit;
+
+    const conditions = [];
+
+    if (filters.status) {
+      conditions.push(eq(maintenanceBills.status, filters.status));
+    }
+    if (filters.billingPeriod) {
+      conditions.push(eq(maintenanceBills.billingPeriod, filters.billingPeriod));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const query = db
+      .select({
+        id: maintenanceBills.id,
+        billNumber: maintenanceBills.billNumber,
+        billingPeriod: maintenanceBills.billingPeriod,
+        maintenanceAmount: maintenanceBills.maintenanceAmount,
+        waterAmount: maintenanceBills.waterAmount,
+        electricityAmount: maintenanceBills.electricityAmount,
+        penaltyAmount: maintenanceBills.penaltyAmount,
+        otherAmount: maintenanceBills.otherAmount,
+        totalAmount: maintenanceBills.totalAmount,
+        status: maintenanceBills.status,
+        dueDate: maintenanceBills.dueDate,
+        unit: {
+          block: units.block,
+          flatNumber: units.flatNumber,
+        },
+      })
+      .from(maintenanceBills)
+      .innerJoin(units, eq(maintenanceBills.unitId, units.id))
+      .where(whereClause)
+      .orderBy(desc(maintenanceBills.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const countQuery = db
+      .select({ count: sql<number>`count(*)` })
+      .from(maintenanceBills)
+      .where(whereClause);
+
+    const [results, countResult] = await Promise.all([query, countQuery]);
+
+    const total = Number(countResult[0]?.count || 0);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      bills: results,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    };
   }
 }

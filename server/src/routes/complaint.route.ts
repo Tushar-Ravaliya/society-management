@@ -46,4 +46,10 @@ router.get(
   ComplaintController.getComplaints
 );
 
+router.get(
+  "/:id",
+  authenticate,
+  ComplaintController.getComplaintById
+);
+
 export default router;

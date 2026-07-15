@@ -28,4 +28,10 @@ router.get(
   ServiceRequestController.getServiceRequests
 );
 
+router.get(
+  "/:id",
+  authenticate,
+  ServiceRequestController.getServiceRequestById
+);
+
 export default router;

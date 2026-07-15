@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { router } from './routes';
 import { useAuthStore } from './stores/auth.store';
+import { ErrorBoundary } from './components/feedback/ErrorBoundary';
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
@@ -13,7 +14,9 @@ function App() {
 
   return (
     <>
-      <RouterProvider router={router} />
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
       <Toaster position="top-right" richColors closeButton />
     </>
   );

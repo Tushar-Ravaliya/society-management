@@ -157,4 +157,45 @@ export class ServiceRequestService {
       },
     };
   }
+
+  // Get request by ID
+  public static async getServiceRequestById(id: string, userId: string, userRole: string) {
+    const query = db
+      .select({
+        id: serviceRequests.id,
+        title: serviceRequests.title,
+        description: serviceRequests.description,
+        requestType: serviceRequests.requestType,
+        status: serviceRequests.status,
+        preferredDate: serviceRequests.preferredDate,
+        adminRemarks: serviceRequests.adminRemarks,
+        completedAt: serviceRequests.completedAt,
+        createdAt: serviceRequests.createdAt,
+        raisedBy: {
+          id: users.id,
+          name: users.name,
+          flat: sql<string | null>`case when ${units.block} is not null then concat(${units.block}, '-', ${units.flatNumber}) else null end`,
+        },
+      })
+      .from(serviceRequests)
+      .innerJoin(users, eq(serviceRequests.raisedById, users.id))
+      .leftJoin(residentProfiles, eq(users.id, residentProfiles.id))
+      .leftJoin(units, eq(residentProfiles.unitId, units.id))
+      .where(eq(serviceRequests.id, id))
+      .limit(1);
+
+    const results = await query;
+    if (results.length === 0) {
+      throw new AppError("Service request not found", 404);
+    }
+
+    const request = results[0];
+
+    // Role-based scoping: resident can only see their own requests
+    if (userRole === "resident" && request.raisedBy.id !== userId) {
+      throw new AppError("You are not authorized to view this service request", 403);
+    }
+
+    return request;
+  }
 }

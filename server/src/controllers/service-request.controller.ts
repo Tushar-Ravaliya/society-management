@@ -93,4 +93,31 @@ export class ServiceRequestController {
       next(error);
     }
   }
+
+  // GET /api/service-requests/:id
+  public static async getServiceRequestById(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError("Authentication required", 401);
+      }
+
+      const { id } = req.params;
+      const serviceRequest = await ServiceRequestService.getServiceRequestById(
+        id,
+        req.user.id,
+        req.user.role
+      );
+
+      res.status(200).json({
+        success: true,
+        data: { serviceRequest },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
