@@ -20,7 +20,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -39,8 +39,22 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/admin/audit-logs", auditRoutes);
 
-app.get("/", async (req, res) => {
-  res.send("Hello World");
+app.get("/health", async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      status: "OK",
+      timestamp: new Date().toISOString(),
+      database: "connected",
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      status: "ERROR",
+      timestamp: new Date().toISOString(),
+      error: error.message || String(error),
+    });
+  }
 });
 
 app.use(errorHandler);
