@@ -14,6 +14,13 @@ unitRouter.post(
   ResidentController.createUnit
 );
 
+unitRouter.get(
+  "/",
+  authenticate,
+  requireRoles(["admin"]),
+  ResidentController.getUnits
+);
+
 export const residentRouter = Router();
 
 residentRouter.post(

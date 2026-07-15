@@ -26,6 +26,34 @@ export class ResidentController {
     }
   }
 
+  // GET /api/units
+  public static async getUnits(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const status = req.query.status as string | undefined;
+      const block = req.query.block as string | undefined;
+      const page = parseInt(req.query.page as string || "1", 10);
+      const limit = parseInt(req.query.limit as string || "10", 10);
+
+      const result = await ResidentService.getUnits({
+        status,
+        block,
+        page,
+        limit,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // POST /api/residents/onboard
   public static async onboardResident(
     req: Request,

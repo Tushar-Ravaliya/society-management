@@ -245,4 +245,57 @@ export class ResidentService {
       },
     };
   }
+
+  // Get Units with pagination and filtering
+  public static async getUnits(filters: {
+    status?: string;
+    block?: string;
+    page: number;
+    limit: number;
+  }) {
+    const page = Math.max(1, filters.page);
+    const limit = Math.max(1, filters.limit);
+    const offset = (page - 1) * limit;
+
+    const conditions = [];
+
+    if (filters.status) {
+      conditions.push(eq(units.status, filters.status as any));
+    }
+    if (filters.block) {
+      conditions.push(eq(units.block, filters.block));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const unitsQuery = db
+      .select()
+      .from(units)
+      .where(whereClause)
+      .limit(limit)
+      .offset(offset);
+
+    const totalCountQuery = db
+      .select({ count: sql<number>`count(*)` })
+      .from(units)
+      .where(whereClause);
+
+    const [unitsResult, totalResult] = await Promise.all([
+      unitsQuery,
+      totalCountQuery,
+    ]);
+
+    const total = Number(totalResult[0]?.count || 0);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      units: unitsResult,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    };
+  }
 }

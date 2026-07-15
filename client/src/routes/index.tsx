@@ -7,10 +7,17 @@ import { RoleGuard } from './RoleGuard';
 // Pages
 import { LoginPage } from '../features/auth/pages/LoginPage';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
+import { ResidentsPage } from '../features/residents/pages/ResidentsPage';
+import { OnboardResidentPage } from '../features/residents/pages/OnboardResidentPage';
+import { UnitsPage } from '../features/units/pages/UnitsPage';
+import { CreateUnitPage } from '../features/units/pages/CreateUnitPage';
+import { CommitteePage } from '../features/committee/pages/CommitteePage';
+import { AssignCommitteePage } from '../features/committee/pages/AssignCommitteePage';
+import { AnnouncementsPage } from '../features/announcements/pages/AnnouncementsPage';
+import { CreateAnnouncementPage } from '../features/announcements/pages/CreateAnnouncementPage';
+
 import { 
-  RegisterPage, ResidentsPage, OnboardResidentPage,
-  UnitsPage, CreateUnitPage, CommitteePage, AssignCommitteePage, AnnouncementsPage,
-  CreateAnnouncementPage, ComplaintsPage, LodgeComplaintPage, ComplaintDetailPage,
+  RegisterPage, ComplaintsPage, LodgeComplaintPage, ComplaintDetailPage,
   ServiceRequestsPage, RaiseRequestPage, RequestDetailPage, BillsPage, GenerateBillsPage,
   BillDetailPage, MyBillsPage, PaymentsPage, MakePaymentPage, DefaultersPage, AuditLogsPage
 } from '../pages';

@@ -9,3 +9,8 @@ export interface PaginationMeta {
   limit: number;
   totalPages: number;
 }
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}
