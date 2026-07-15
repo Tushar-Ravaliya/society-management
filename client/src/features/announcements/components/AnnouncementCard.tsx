@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pin, Trash2 } from 'lucide-react';
+import { Edit, Pin, Trash2 } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Avatar } from '../../../components/ui/Avatar';
 import { Badge } from '../../../components/ui/Badge';
@@ -8,29 +8,41 @@ import type { Announcement } from '../../../types/announcement.types';
 
 interface AnnouncementCardProps {
   announcement: Announcement;
-  canDelete: boolean;
+  canManage: boolean;
+  onEdit: (announcement: Announcement) => void;
   onDelete: (id: string) => void;
 }
 
-export const AnnouncementCard: React.FC<AnnouncementCardProps> = ({ announcement, canDelete, onDelete }) => {
+export const AnnouncementCard: React.FC<AnnouncementCardProps> = ({ announcement, canManage, onEdit, onDelete }) => {
   return (
     <Card 
       hover 
       className={`p-5 relative ${announcement.isPinned ? 'border-l-4 border-l-primary' : ''}`}
     >
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex justify-between items-start gap-4 mb-3">
         <h3 className="font-display text-lg font-semibold text-charcoal flex items-center gap-2">
           {announcement.isPinned && <Pin className="w-4 h-4 text-primary" />}
           {announcement.title}
         </h3>
-        {canDelete && (
-          <button 
-            onClick={() => onDelete(announcement.id)}
-            className="text-charcoal-muted hover:text-error transition-colors p-1"
-            title="Delete announcement"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+        {canManage && (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => onEdit(announcement)}
+              className="text-charcoal-muted hover:text-primary transition-colors p-1"
+              title="Edit announcement"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button 
+              type="button"
+              onClick={() => onDelete(announcement.id)}
+              className="text-charcoal-muted hover:text-error transition-colors p-1"
+              title="Delete announcement"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         )}
       </div>
 

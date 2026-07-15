@@ -7,8 +7,11 @@ export const committeeApi = {
     api.get<ApiResponse<{ committee: CommitteeMember[] }>>('/committee', { params: { activeOnly } }),
 
   assign: (data: AssignCommitteeMemberPayload) =>
-    api.post<ApiResponse<{ member: CommitteeMember }>>('/committee', data),
+    api.post<ApiResponse<{ committeeMember: CommitteeMember }>>('/committee', data),
 
   update: (id: string, data: UpdateCommitteeMemberPayload) =>
-    api.patch<ApiResponse<{ member: CommitteeMember }>>(`/committee/${id}`, data),
+    api.patch<ApiResponse<{ committeeMember: CommitteeMember }>>(`/committee/${id}`, data),
+
+  delete: (id: string) =>
+    api.delete<ApiResponse<{ message: string }>>(`/committee/${id}`),
 };

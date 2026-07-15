@@ -19,3 +19,5 @@ export interface CreateAnnouncementPayload {
   isPinned?: boolean;
   expiresAt?: string | null;
 }
+
+export type UpdateAnnouncementPayload = Partial<CreateAnnouncementPayload>;

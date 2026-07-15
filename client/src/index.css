@@ -2,16 +2,58 @@
 
 @theme {
   --color-white-base: #FFFFFF;
-  --color-aura: #F8F6FC;
-  --color-primary: #6D28D9;
-  --color-primary-dark: #4C1D95;
-  --color-orchid: #A78BFA;
-  --color-charcoal: #1F1A24;
-  --color-charcoal-muted: #6B5F73;
-  --color-error: #DC2626;
-  --color-success: #059669;
-  --color-warning: #D97706;
+  --color-aura: #F6F5FA;
+  --color-primary: #6366F1; /* Indigo-500 for a fresh, clean modern look */
+  --color-primary-dark: #4F46E5; /* Indigo-600 */
+  --color-primary-light: #EEF2FF; /* Indigo-50 */
+  --color-orchid: #C7D2FE; /* Indigo-200 */
+  --color-charcoal: #0F172A; /* Slate-900 for dark Slate text */
+  --color-charcoal-muted: #64748B; /* Slate-500 */
+  --color-error: #EF4444; /* Red-500 */
+  --color-success: #10B981; /* Emerald-500 */
+  --color-warning: #F59E0B; /* Amber-500 */
 
   --font-display: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'Inter', sans-serif;
+
+  --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-slide-up: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
 }
+
+/* Global scrollbar and base refinements */
+@layer base {
+  body {
+    @apply text-charcoal bg-aura font-body antialiased selection:bg-primary/20;
+  }
+
+  /* Custom narrow scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-charcoal-muted/20 rounded-full hover:bg-charcoal-muted/40 transition-colors;
+  }
+}
+
+/* Layout animation utilities */
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

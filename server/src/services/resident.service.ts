@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { eq, and, like, or, sql } from "drizzle-orm";
+import { eq, and, like, or, sql, ne } from "drizzle-orm";
 import { db } from "../db/db";
 import { users, units, residentProfiles } from "../db/schema";
 import { AppError } from "../middlewares/errorHandler";
@@ -54,7 +54,7 @@ export class ResidentService {
       throw new AppError("Flat already exists in this block", 409);
     }
 
-    const [newUnit] = await db
+    const [newUnitRecord] = await db
       .insert(units)
       .values({
         block: data.block,
@@ -65,6 +65,8 @@ export class ResidentService {
       })
       .returning();
 
+    const newUnit = newUnitRecord!;
+
     return {
       id: newUnit.id,
       block: newUnit.block,
@@ -73,6 +75,79 @@ export class ResidentService {
       bhkType: newUnit.bhkType,
       status: newUnit.status,
     };
+  }
+
+  public static async updateUnit(
+    id: string,
+    data: Partial<{
+      block: string;
+      flatNumber: string;
+      floor: number;
+      bhkType: string;
+    }>
+  ): Promise<UnitDTO> {
+    const existing = await db.select().from(units).where(eq(units.id, id)).limit(1);
+
+    if (existing.length === 0) {
+      throw new AppError("Unit not found", 404);
+    }
+
+    const currentUnit = existing[0]!;
+    const nextBlock = data.block ?? currentUnit.block;
+    const nextFlatNumber = data.flatNumber ?? currentUnit.flatNumber;
+
+    if (data.block || data.flatNumber) {
+      const duplicate = await db
+        .select()
+        .from(units)
+        .where(
+          and(
+            eq(units.block, nextBlock),
+            eq(units.flatNumber, nextFlatNumber),
+            ne(units.id, id)
+          )
+        )
+        .limit(1);
+
+      if (duplicate.length > 0) {
+        throw new AppError("Flat already exists in this block", 409);
+      }
+    }
+
+    const [updatedRecord] = await db
+      .update(units)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(units.id, id))
+      .returning();
+
+    const updated = updatedRecord!;
+
+    return {
+      id: updated.id,
+      block: updated.block,
+      flatNumber: updated.flatNumber,
+      floor: updated.floor,
+      bhkType: updated.bhkType,
+      status: updated.status,
+    };
+  }
+
+  public static async deleteUnit(id: string): Promise<void> {
+    const unitRecords = await db.select().from(units).where(eq(units.id, id)).limit(1);
+
+    if (unitRecords.length === 0) {
+      throw new AppError("Unit not found", 404);
+    }
+
+    const unit = unitRecords[0]!;
+    if (unit.status === "occupied") {
+      throw new AppError("Cannot delete an occupied unit", 400);
+    }
+
+    await db.delete(units).where(eq(units.id, id));
   }
 
   // Onboard and assign a resident to a unit
@@ -95,7 +170,7 @@ export class ResidentService {
       throw new AppError("Unit not found", 404);
     }
 
-    const unit = unitRecords[0];
+    const unit = unitRecords[0]!;
     if (unit.status !== "vacant") {
       throw new AppError("Unit is already occupied", 400);
     }
@@ -118,7 +193,7 @@ export class ResidentService {
     // 3. Atomically onboard user, assign unit, update unit status
     return await db.transaction(async (tx) => {
       // Create user record
-      const [newUser] = await tx
+      const [newUserRecord] = await tx
         .insert(users)
         .values({
           email: data.email,
@@ -130,8 +205,10 @@ export class ResidentService {
         })
         .returning();
 
+      const newUser = newUserRecord!;
+
       // Create profile record
-      const [newProfile] = await tx
+      const [newProfileRecord] = await tx
         .insert(residentProfiles)
         .values({
           id: newUser.id,
@@ -140,6 +217,8 @@ export class ResidentService {
           vehicleNumber: data.vehicleNumber || null,
         })
         .returning();
+
+      const newProfile = newProfileRecord!;
 
       // Update unit status to occupied
       await tx
@@ -162,6 +241,100 @@ export class ResidentService {
           flatNumber: unit.flatNumber,
         },
       };
+    });
+  }
+
+  public static async updateResident(
+    id: string,
+    data: {
+      name?: string;
+      phoneNumber?: string | null;
+      residencyType?: "owner" | "tenant";
+      vehicleNumber?: string | null;
+    }
+  ): Promise<ResidentDTO> {
+    const residentRecords = await db
+      .select({
+        id: users.id,
+        unitId: residentProfiles.unitId,
+      })
+      .from(residentProfiles)
+      .innerJoin(users, eq(residentProfiles.id, users.id))
+      .where(eq(residentProfiles.id, id))
+      .limit(1);
+
+    if (residentRecords.length === 0) {
+      throw new AppError("Resident not found", 404);
+    }
+
+    return await db.transaction(async (tx) => {
+      if (data.name !== undefined || data.phoneNumber !== undefined) {
+        await tx
+          .update(users)
+          .set({
+            ...(data.name !== undefined ? { name: data.name } : {}),
+            ...(data.phoneNumber !== undefined ? { phoneNumber: data.phoneNumber || null } : {}),
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, id));
+      }
+
+      if (data.residencyType !== undefined || data.vehicleNumber !== undefined) {
+        await tx
+          .update(residentProfiles)
+          .set({
+            ...(data.residencyType !== undefined ? { residencyType: data.residencyType } : {}),
+            ...(data.vehicleNumber !== undefined ? { vehicleNumber: data.vehicleNumber || null } : {}),
+            updatedAt: new Date(),
+          })
+          .where(eq(residentProfiles.id, id));
+      }
+
+      const [updatedRecord] = await tx
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          role: users.role,
+          status: users.status,
+          phoneNumber: users.phoneNumber,
+          residencyType: residentProfiles.residencyType,
+          vehicleNumber: residentProfiles.vehicleNumber,
+          unit: {
+            id: units.id,
+            block: units.block,
+            flatNumber: units.flatNumber,
+          },
+        })
+        .from(residentProfiles)
+        .innerJoin(users, eq(residentProfiles.id, users.id))
+        .innerJoin(units, eq(residentProfiles.unitId, units.id))
+        .where(eq(residentProfiles.id, id));
+
+      const updated = updatedRecord!;
+      return updated;
+    });
+  }
+
+  public static async deleteResident(id: string): Promise<void> {
+    const residentRecords = await db
+      .select({ unitId: residentProfiles.unitId })
+      .from(residentProfiles)
+      .where(eq(residentProfiles.id, id))
+      .limit(1);
+
+    if (residentRecords.length === 0) {
+      throw new AppError("Resident not found", 404);
+    }
+
+    const resident = residentRecords[0]!;
+
+    await db.transaction(async (tx) => {
+      await tx.delete(users).where(eq(users.id, id));
+      await tx
+        .update(units)
+        .set({ status: "vacant", updatedAt: new Date() })
+        .where(eq(units.id, resident.unitId));
     });
   }
 

@@ -10,3 +10,5 @@ export const createAnnouncementSchema = z.object({
     .optional()
     .nullable(),
 });
+
+export const updateAnnouncementSchema = createAnnouncementSchema.partial();

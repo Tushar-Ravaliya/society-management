@@ -1,12 +1,15 @@
 import React from 'react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Badge } from '../../../components/ui/Badge';
 import type { Unit } from '../../../types/unit.types';
 
 interface UnitTableProps {
   data: Unit[];
+  onEdit?: (unit: Unit) => void;
+  onDelete?: (unit: Unit) => void;
 }
 
-export const UnitTable: React.FC<UnitTableProps> = ({ data }) => {
+export const UnitTable: React.FC<UnitTableProps> = ({ data, onEdit, onDelete }) => {
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-orchid/10 bg-white">
       <table className="w-full text-left text-sm whitespace-nowrap">
@@ -17,19 +20,20 @@ export const UnitTable: React.FC<UnitTableProps> = ({ data }) => {
             <th className="px-4 py-3">Floor</th>
             <th className="px-4 py-3">BHK Type</th>
             <th className="px-4 py-3">Status</th>
+            <th className="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
           {data.length === 0 ? (
             <tr>
-              <td colSpan={5} className="px-4 py-8 text-center text-charcoal-muted">
+              <td colSpan={6} className="px-4 py-8 text-center text-charcoal-muted">
                 No units found.
               </td>
             </tr>
           ) : (
             data.map((unit, idx) => (
-              <tr 
-                key={unit.id} 
+              <tr
+                key={unit.id}
                 className={`border-b border-orchid/5 hover:bg-aura/30 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-aura/10'}`}
               >
                 <td className="px-4 py-3 font-medium text-charcoal">{unit.block}</td>
@@ -40,6 +44,26 @@ export const UnitTable: React.FC<UnitTableProps> = ({ data }) => {
                   <Badge variant={unit.status === 'occupied' ? 'success' : 'neutral'}>
                     {unit.status}
                   </Badge>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onEdit?.(unit)}
+                      className="p-1.5 rounded-md text-charcoal-muted hover:text-primary hover:bg-primary-light/40 transition-colors"
+                      title="Edit unit"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete?.(unit)}
+                      className="p-1.5 rounded-md text-charcoal-muted hover:text-error hover:bg-error/10 transition-colors"
+                      title="Delete unit"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))

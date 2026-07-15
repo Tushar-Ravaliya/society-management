@@ -18,3 +18,10 @@ export interface OnboardResidentPayload {
   phoneNumber?: string;
   vehicleNumber?: string;
 }
+
+export interface UpdateResidentPayload {
+  name?: string;
+  phoneNumber?: string | null;
+  residencyType?: 'owner' | 'tenant';
+  vehicleNumber?: string | null;
+}

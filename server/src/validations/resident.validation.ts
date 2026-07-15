@@ -7,6 +7,8 @@ export const createUnitSchema = z.object({
   bhkType: z.string().min(1, "BHK type is required").max(10),
 });
 
+export const updateUnitSchema = createUnitSchema.partial();
+
 export const onboardResidentSchema = z.object({
   email: z.email("Invalid email format"),
   name: z.string().min(2, "Name must be at least 2 characters long"),
@@ -14,4 +16,11 @@ export const onboardResidentSchema = z.object({
   residencyType: z.enum(["owner", "tenant"]),
   phoneNumber: z.string().optional(),
   vehicleNumber: z.string().optional(),
+});
+
+export const updateResidentSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters long").optional(),
+  phoneNumber: z.string().optional().nullable(),
+  residencyType: z.enum(["owner", "tenant"]).optional(),
+  vehicleNumber: z.string().optional().nullable(),
 });

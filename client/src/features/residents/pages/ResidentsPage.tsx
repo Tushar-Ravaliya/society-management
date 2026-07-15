@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
+import { Modal } from '../../../components/ui/Modal';
 import { Select } from '../../../components/ui/Select';
 import { Pagination } from '../../../components/data/Pagination';
 import { ResidentTable } from '../components/ResidentTable';
@@ -23,35 +24,93 @@ export const ResidentsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [residencyType, setResidencyType] = useState<string>('');
+  const [editingResident, setEditingResident] = useState<Resident | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phoneNumber: '',
+    residencyType: 'tenant' as 'owner' | 'tenant',
+    vehicleNumber: '',
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(timer);
   }, [search]);
 
-  useEffect(() => {
-    const fetchResidents = async () => {
-      setLoading(true);
-      try {
-        const res = await residentsApi.getDirectory({ 
-          page, 
-          limit, 
-          search: debouncedSearch,
-          residencyType: residencyType || undefined
-        });
-        
-        if (res.data.success) {
-          setData(res.data.data.residents || []);
-          setTotal(res.data.data.pagination?.total || 0);
-        }
-      } catch (err: any) {
-        toast.error('Failed to load residents');
-      } finally {
-        setLoading(false);
+  const fetchResidents = async () => {
+    setLoading(true);
+    try {
+      const res = await residentsApi.getDirectory({ 
+        page, 
+        limit, 
+        search: debouncedSearch,
+        residencyType: residencyType || undefined
+      });
+      
+      if (res.data.success) {
+        setData(res.data.data.residents || []);
+        setTotal(res.data.data.pagination?.total || 0);
       }
-    };
+    } catch (err: any) {
+      toast.error('Failed to load residents');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchResidents();
   }, [page, debouncedSearch, residencyType]);
+
+  const openEdit = (resident: Resident) => {
+    setEditingResident(resident);
+    setEditForm({
+      name: resident.name,
+      phoneNumber: resident.phoneNumber || '',
+      residencyType: resident.residencyType,
+      vehicleNumber: resident.vehicleNumber || '',
+    });
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingResident) return;
+
+    setSaving(true);
+    try {
+      const res = await residentsApi.update(editingResident.id, {
+        name: editForm.name,
+        phoneNumber: editForm.phoneNumber || null,
+        residencyType: editForm.residencyType,
+        vehicleNumber: editForm.vehicleNumber || null,
+      });
+
+      if (res.data.success) {
+        toast.success('Resident updated');
+        setEditingResident(null);
+        fetchResidents();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update resident');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (resident: Resident) => {
+    if (!confirm(`Delete ${resident.name}? Their assigned unit will be marked vacant.`)) return;
+
+    try {
+      const res = await residentsApi.delete(resident.id);
+      if (res.data.success) {
+        toast.success('Resident deleted');
+        fetchResidents();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete resident');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -89,7 +148,7 @@ export const ResidentsPage: React.FC = () => {
       </div>
 
       <div className={loading ? 'opacity-50 pointer-events-none transition-opacity' : 'transition-opacity'}>
-        <ResidentTable data={data} />
+        <ResidentTable data={data} canManage={role === 'admin'} onEdit={openEdit} onDelete={handleDelete} />
       </div>
 
       {total > 0 && (
@@ -99,6 +158,44 @@ export const ResidentsPage: React.FC = () => {
           onPageChange={setPage} 
         />
       )}
+
+      <Modal open={!!editingResident} onClose={() => setEditingResident(null)} title="Edit Resident">
+        <form onSubmit={handleUpdate} className="space-y-4">
+          <Input
+            label="Name"
+            value={editForm.name}
+            onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+            required
+          />
+          <Input
+            label="Phone"
+            value={editForm.phoneNumber}
+            onChange={(e) => setEditForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
+          />
+          <Select
+            label="Residency Type"
+            value={editForm.residencyType}
+            onChange={(e) => setEditForm((prev) => ({ ...prev, residencyType: e.target.value as 'owner' | 'tenant' }))}
+            options={[
+              { value: 'owner', label: 'Owner' },
+              { value: 'tenant', label: 'Tenant' },
+            ]}
+          />
+          <Input
+            label="Vehicle Number"
+            value={editForm.vehicleNumber}
+            onChange={(e) => setEditForm((prev) => ({ ...prev, vehicleNumber: e.target.value }))}
+          />
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setEditingResident(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={saving}>
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AnnouncementController } from "../controllers/announcement.controller";
-import { createAnnouncementSchema } from "../validations/announcement.validation";
+import { createAnnouncementSchema, updateAnnouncementSchema } from "../validations/announcement.validation";
 import { validateBody } from "../middlewares/validate";
 import { authenticate, requireRoles } from "../middlewares/auth";
 
@@ -18,6 +18,14 @@ router.get(
   "/",
   authenticate,
   AnnouncementController.getAnnouncements
+);
+
+router.patch(
+  "/:id",
+  authenticate,
+  requireRoles(["admin", "committee"]),
+  validateBody(updateAnnouncementSchema),
+  AnnouncementController.updateAnnouncement
 );
 
 router.delete(

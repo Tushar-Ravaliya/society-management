@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { ResidentService } from "../services/resident.service";
 
 export class ResidentController {
@@ -48,6 +48,42 @@ export class ResidentController {
       res.status(200).json({
         success: true,
         data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // PATCH /api/units/:id
+  public static async updateUnit(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const unit = await ResidentService.updateUnit(req.params.id as string, req.body);
+
+      res.status(200).json({
+        success: true,
+        data: { unit },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // DELETE /api/units/:id
+  public static async deleteUnit(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      await ResidentService.deleteUnit(req.params.id as string);
+
+      res.status(200).json({
+        success: true,
+        data: { message: "Unit deleted successfully" },
       });
     } catch (error) {
       next(error);
@@ -107,6 +143,42 @@ export class ResidentController {
       res.status(200).json({
         success: true,
         data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // PATCH /api/residents/:id
+  public static async updateResident(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const resident = await ResidentService.updateResident(req.params.id as string, req.body);
+
+      res.status(200).json({
+        success: true,
+        data: { resident },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // DELETE /api/residents/:id
+  public static async deleteResident(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      await ResidentService.deleteResident(req.params.id as string);
+
+      res.status(200).json({
+        success: true,
+        data: { message: "Resident deleted successfully" },
       });
     } catch (error) {
       next(error);

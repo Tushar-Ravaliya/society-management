@@ -35,7 +35,7 @@ export class CommitteeService {
       throw new AppError("User not found", 404);
     }
 
-    const user = userRecords[0];
+    const user = userRecords[0]!;
     if (user.status !== "active") {
       throw new AppError("User is not active", 400);
     }
@@ -60,7 +60,7 @@ export class CommitteeService {
         .where(eq(users.id, data.userId));
 
       // Insert committee member record
-      const [newMember] = await tx
+      const [newMemberRecord] = await tx
         .insert(committeeMembers)
         .values({
           id: data.userId,
@@ -71,6 +71,8 @@ export class CommitteeService {
           isActive: true,
         })
         .returning();
+
+      const newMember = newMemberRecord!;
 
       return {
         id: newMember.id,
@@ -132,7 +134,7 @@ export class CommitteeService {
     }
 
     // Update committee record fields directly
-    const [updated] = await db
+    const [updatedRecord] = await db
       .update(committeeMembers)
       .set({
         ...data,
@@ -140,6 +142,8 @@ export class CommitteeService {
       })
       .where(eq(committeeMembers.id, id))
       .returning();
+
+    const updated = updatedRecord!;
 
     return {
       id: updated.id,
@@ -149,5 +153,22 @@ export class CommitteeService {
       termEnd: updated.termEnd,
       isActive: updated.isActive,
     };
+  }
+
+  public static async deleteCommitteeMember(id: string): Promise<void> {
+    const existing = await db
+      .select()
+      .from(committeeMembers)
+      .where(eq(committeeMembers.id, id))
+      .limit(1);
+
+    if (existing.length === 0) {
+      throw new AppError("Committee member not found", 404);
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.delete(committeeMembers).where(eq(committeeMembers.id, id));
+      await tx.update(users).set({ role: "resident", updatedAt: new Date() }).where(eq(users.id, id));
+    });
   }
 }

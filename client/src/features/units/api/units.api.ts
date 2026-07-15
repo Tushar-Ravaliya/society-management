@@ -1,5 +1,5 @@
 import { api } from '../../../config/api';
-import type { Unit, CreateUnitPayload } from '../../../types/unit.types';
+import type { Unit, CreateUnitPayload, UpdateUnitPayload } from '../../../types/unit.types';
 import type { ApiResponse, PaginationMeta } from '../../../types/common.types';
 
 export const unitsApi = {
@@ -8,4 +8,10 @@ export const unitsApi = {
 
   create: (data: CreateUnitPayload) =>
     api.post<ApiResponse<{ unit: Unit }>>('/units', data),
+
+  update: (id: string, data: UpdateUnitPayload) =>
+    api.patch<ApiResponse<{ unit: Unit }>>(`/units/${id}`, data),
+
+  delete: (id: string) =>
+    api.delete<ApiResponse<{ message: string }>>(`/units/${id}`),
 };

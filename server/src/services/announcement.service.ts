@@ -121,6 +121,46 @@ export class AnnouncementService {
     };
   }
 
+  public static async updateAnnouncement(
+    id: string,
+    data: Partial<{
+      title: string;
+      content: string;
+      audience: "all" | "residents" | "committee";
+      isPinned: boolean;
+      expiresAt: Date | null;
+    }>,
+    userId: string,
+    userRole: string
+  ): Promise<any> {
+    const record = await db
+      .select()
+      .from(announcements)
+      .where(eq(announcements.id, id))
+      .limit(1);
+
+    if (record.length === 0) {
+      throw new AppError("Announcement not found", 404);
+    }
+
+    const announcement = record[0]!;
+
+    if (!(userRole === "admin" || (userRole === "committee" && announcement.publishedById === userId))) {
+      throw new AppError("Access denied to update this announcement", 403);
+    }
+
+    const [updated] = await db
+      .update(announcements)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(announcements.id, id))
+      .returning();
+
+    return updated!;
+  }
+
   // Delete an announcement
   public static async deleteAnnouncement(
     id: string,
@@ -137,7 +177,7 @@ export class AnnouncementService {
       throw new AppError("Announcement not found", 404);
     }
 
-    const announcement = record[0];
+    const announcement = record[0]!;
 
     // Deletion access control
     if (userRole === "admin") {

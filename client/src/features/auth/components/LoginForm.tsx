@@ -62,51 +62,48 @@ export const LoginForm: React.FC = () => {
         />
       </FormField>
 
-      <Button type="submit" className="w-full mt-4" loading={isSubmitting}>
+      <Button type="submit" className="w-full mt-5 py-2.5 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20" loading={isSubmitting}>
         Sign in
       </Button>
 
-      <div className="mt-8 border-t border-orchid/10 pt-6">
-        <p className="text-xs text-charcoal-muted text-center mb-3 uppercase tracking-wider font-semibold">
-          Quick Login (Demo)
+      <div className="mt-8 border-t border-slate-100 pt-6">
+        <p className="text-[10px] text-charcoal-muted/70 text-center mb-4 uppercase tracking-widest font-bold">
+          Quick Access (Demo)
         </p>
-        <div className="grid grid-cols-3 gap-2">
-          <Button
+        <div className="grid grid-cols-3 gap-3">
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
-            className="text-xs"
+            className="flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-100 hover:border-primary/30 hover:bg-primary-light/40 transition-all duration-300 cursor-pointer select-none group"
             onClick={() => {
               setValue("email", "admin@society.com");
               setValue("password", "Password@123");
             }}
           >
-            Admin
-          </Button>
-          <Button
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary group-hover:scale-105 duration-300">Admin</span>
+            <span className="text-[9px] text-charcoal-muted/70 mt-0.5">Full access</span>
+          </button>
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
-            className="text-xs"
+            className="flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-100 hover:border-warning/30 hover:bg-amber-50/40 transition-all duration-300 cursor-pointer select-none group"
             onClick={() => {
               setValue("email", "committee@society.com");
               setValue("password", "Password@123");
             }}
           >
-            Committee
-          </Button>
-          <Button
+            <span className="text-[10px] font-bold uppercase tracking-wider text-warning group-hover:scale-105 duration-300">Committee</span>
+            <span className="text-[9px] text-charcoal-muted/70 mt-0.5">Management</span>
+          </button>
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
-            className="text-xs"
+            className="flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-100 hover:border-success/30 hover:bg-emerald-50/40 transition-all duration-300 cursor-pointer select-none group"
             onClick={() => {
               setValue("email", "john@society.com");
               setValue("password", "Password@123");
             }}
           >
-            Resident
-          </Button>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-success group-hover:scale-105 duration-300">Resident</span>
+            <span className="text-[9px] text-charcoal-muted/70 mt-0.5">A-101 Unit</span>
+          </button>
         </div>
       </div>
     </form>

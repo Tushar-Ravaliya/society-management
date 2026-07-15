@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone } from 'lucide-react';
+import { Edit, Mail, Phone, Trash2 } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Avatar } from '../../../components/ui/Avatar';
 import { Badge } from '../../../components/ui/Badge';
@@ -11,9 +11,10 @@ interface CommitteeListProps {
   members: CommitteeMember[];
   isAdmin: boolean;
   onEdit?: (member: CommitteeMember) => void;
+  onDelete?: (member: CommitteeMember) => void;
 }
 
-export const CommitteeList: React.FC<CommitteeListProps> = ({ members, isAdmin, onEdit }) => {
+export const CommitteeList: React.FC<CommitteeListProps> = ({ members, isAdmin, onEdit, onDelete }) => {
   if (members.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-xl border border-orchid/10">
@@ -26,15 +27,27 @@ export const CommitteeList: React.FC<CommitteeListProps> = ({ members, isAdmin, 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {members.map(member => (
         <Card key={member.id} hover className="p-6 relative">
-          {isAdmin && onEdit && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="absolute top-4 right-4 text-xs"
-              onClick={() => onEdit(member)}
-            >
-              Edit
-            </Button>
+          {isAdmin && (
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="px-2"
+                onClick={() => onEdit?.(member)}
+                title="Edit committee member"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="px-2 text-error hover:text-error hover:bg-error/10"
+                onClick={() => onDelete?.(member)}
+                title="Delete committee member"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
           )}
           
           <div className="flex flex-col items-center text-center">
@@ -55,7 +68,7 @@ export const CommitteeList: React.FC<CommitteeListProps> = ({ members, isAdmin, 
             </div>
 
             <div className="mt-4 pt-4 border-t border-orchid/10 w-full flex justify-between items-center text-xs text-charcoal-muted">
-              <span>{formatDate(member.termStart)} – {formatDate(member.termEnd)}</span>
+              <span>{formatDate(member.termStart)} - {formatDate(member.termEnd)}</span>
               <Badge variant={member.isActive ? 'success' : 'neutral'}>
                 {member.isActive ? 'Active' : 'Inactive'}
               </Badge>

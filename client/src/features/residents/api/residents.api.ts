@@ -1,5 +1,5 @@
 import { api } from '../../../config/api';
-import type { Resident, OnboardResidentPayload } from '../../../types/resident.types';
+import type { Resident, OnboardResidentPayload, UpdateResidentPayload } from '../../../types/resident.types';
 import type { ApiResponse, PaginationMeta } from '../../../types/common.types';
 
 export const residentsApi = {
@@ -8,4 +8,10 @@ export const residentsApi = {
 
   onboard: (data: OnboardResidentPayload) =>
     api.post<ApiResponse<{ resident: Resident, message: string }>>('/residents/onboard', data),
+
+  update: (id: string, data: UpdateResidentPayload) =>
+    api.patch<ApiResponse<{ resident: Resident }>>(`/residents/${id}`, data),
+
+  delete: (id: string) =>
+    api.delete<ApiResponse<{ message: string }>>(`/residents/${id}`),
 };

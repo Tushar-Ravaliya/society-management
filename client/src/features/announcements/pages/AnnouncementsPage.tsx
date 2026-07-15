@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button';
+import { Input } from '../../../components/ui/Input';
+import { Modal } from '../../../components/ui/Modal';
+import { Select } from '../../../components/ui/Select';
+import { Textarea } from '../../../components/ui/Textarea';
 import { AnnouncementCard } from '../components/AnnouncementCard';
 import { Pagination } from '../../../components/data/Pagination';
 import { announcementsApi } from '../api/announcements.api';
 import { useAuth } from '../../../hooks/useAuth';
 import type { Announcement } from '../../../types/announcement.types';
 import { toast } from 'sonner';
+
+const toDateTimeInput = (value: string | null) => {
+  if (!value) return '';
+  return new Date(value).toISOString().slice(0, 16);
+};
 
 export const AnnouncementsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +27,15 @@ export const AnnouncementsPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const limit = 10;
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    content: '',
+    audience: 'all' as 'all' | 'residents' | 'committee',
+    isPinned: false,
+    expiresAt: '',
+  });
 
   const fetchAnnouncements = async () => {
     setLoading(true);
@@ -37,6 +55,46 @@ export const AnnouncementsPage: React.FC = () => {
   useEffect(() => {
     fetchAnnouncements();
   }, [page]);
+
+  const canManageAnnouncement = (announcement: Announcement) =>
+    canManage && (role === 'admin' || announcement.publishedBy.id === user?.id);
+
+  const openEdit = (announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
+    setEditForm({
+      title: announcement.title,
+      content: announcement.content,
+      audience: announcement.audience,
+      isPinned: announcement.isPinned,
+      expiresAt: toDateTimeInput(announcement.expiresAt),
+    });
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAnnouncement) return;
+
+    setSaving(true);
+    try {
+      const res = await announcementsApi.update(editingAnnouncement.id, {
+        title: editForm.title,
+        content: editForm.content,
+        audience: editForm.audience,
+        isPinned: editForm.isPinned,
+        expiresAt: editForm.expiresAt ? new Date(editForm.expiresAt).toISOString() : null,
+      });
+
+      if (res.data.success) {
+        toast.success('Announcement updated');
+        setEditingAnnouncement(null);
+        fetchAnnouncements();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update announcement');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this announcement? This cannot be undone.')) {
@@ -76,7 +134,8 @@ export const AnnouncementsPage: React.FC = () => {
             <AnnouncementCard 
               key={announcement.id} 
               announcement={announcement} 
-              canDelete={canManage && (role === 'admin' || announcement.publishedBy.id === user?.id)}
+              canManage={canManageAnnouncement(announcement)}
+              onEdit={openEdit}
               onDelete={handleDelete}
             />
           ))
@@ -90,6 +149,57 @@ export const AnnouncementsPage: React.FC = () => {
           onPageChange={setPage} 
         />
       )}
+
+      <Modal open={!!editingAnnouncement} onClose={() => setEditingAnnouncement(null)} title="Edit Announcement" size="lg">
+        <form onSubmit={handleUpdate} className="space-y-4">
+          <Input
+            label="Title"
+            value={editForm.title}
+            onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
+            required
+          />
+          <Textarea
+            label="Content"
+            rows={5}
+            value={editForm.content}
+            onChange={(e) => setEditForm((prev) => ({ ...prev, content: e.target.value }))}
+            required
+          />
+          <Select
+            label="Audience"
+            value={editForm.audience}
+            onChange={(e) => setEditForm((prev) => ({ ...prev, audience: e.target.value as 'all' | 'residents' | 'committee' }))}
+            options={[
+              { value: 'all', label: 'Everyone' },
+              { value: 'residents', label: 'Residents' },
+              { value: 'committee', label: 'Committee' },
+            ]}
+          />
+          <Input
+            label="Expires At"
+            type="datetime-local"
+            value={editForm.expiresAt}
+            onChange={(e) => setEditForm((prev) => ({ ...prev, expiresAt: e.target.value }))}
+          />
+          <label className="flex items-center gap-3 text-sm font-medium text-charcoal">
+            <input
+              type="checkbox"
+              checked={editForm.isPinned}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, isPinned: e.target.checked }))}
+              className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+            />
+            Pin announcement
+          </label>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setEditingAnnouncement(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={saving}>
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { CommitteeService } from "../services/committee.service";
 
 export class CommitteeController {
@@ -53,7 +53,7 @@ export class CommitteeController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const { designation, portfolio, isActive } = req.body;
 
       const committeeMember = await CommitteeService.updateCommitteeMember(id, {
@@ -65,6 +65,25 @@ export class CommitteeController {
       res.status(200).json({
         success: true,
         data: { committeeMember },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // DELETE /api/committee/:id
+  public static async deleteCommitteeMember(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const id = req.params.id as string;
+      await CommitteeService.deleteCommitteeMember(id);
+
+      res.status(200).json({
+        success: true,
+        data: { message: "Committee member deleted successfully" },
       });
     } catch (error) {
       next(error);

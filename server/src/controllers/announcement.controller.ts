@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { AnnouncementService } from "../services/announcement.service";
 import { AppError } from "../middlewares/errorHandler";
 
@@ -64,6 +64,41 @@ export class AnnouncementController {
     }
   }
 
+  // PATCH /api/announcements/:id
+  public static async updateAnnouncement(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError("Authentication required", 401);
+      }
+
+      const id = req.params.id as string;
+      const { title, content, audience, isPinned, expiresAt } = req.body;
+      const announcement = await AnnouncementService.updateAnnouncement(
+        id,
+        {
+          title,
+          content,
+          audience,
+          isPinned,
+          expiresAt: expiresAt === undefined ? undefined : expiresAt ? new Date(expiresAt) : null,
+        },
+        req.user.id,
+        req.user.role
+      );
+
+      res.status(200).json({
+        success: true,
+        data: { announcement },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // DELETE /api/announcements/:id
   public static async deleteAnnouncement(
     req: Request,
@@ -75,7 +110,7 @@ export class AnnouncementController {
         throw new AppError("Authentication required", 401);
       }
 
-      const { id } = req.params;
+      const id = req.params.id as string;
       await AnnouncementService.deleteAnnouncement(id, req.user.id, req.user.role);
 
       res.status(200).json({

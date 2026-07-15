@@ -20,9 +20,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres_password@db:5432/society_management
-      - PORT=3000
+    env_file:
+      - ./server/.env
     depends_on:
       - db
     volumes:

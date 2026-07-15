@@ -28,4 +28,11 @@ router.patch(
   CommitteeController.updateCommitteeMember
 );
 
+router.delete(
+  "/:id",
+  authenticate,
+  requireRoles(["admin"]),
+  CommitteeController.deleteCommitteeMember
+);
+
 export default router;

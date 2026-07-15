@@ -13,3 +13,5 @@ export interface CreateUnitPayload {
   floor: number;
   bhkType: string;
 }
+
+export type UpdateUnitPayload = Partial<CreateUnitPayload>;
