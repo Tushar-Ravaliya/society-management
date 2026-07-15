@@ -11,5 +11,11 @@ export default defineConfig({
     watch: {
       usePolling: true, // Enable file polling for HMR on Docker volumes
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
   },
 });

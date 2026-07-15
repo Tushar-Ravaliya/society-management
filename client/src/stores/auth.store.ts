@@ -1,0 +1,40 @@
+import { create } from 'zustand';
+import type { User } from '../types/auth.types';
+import { api } from '../config/api';
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  setUser: (user: User | null) => void;
+  logout: () => void;
+  checkAuth: () => Promise<void>;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  setUser: (user) => set({ user, isAuthenticated: !!user }),
+  logout: async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (e) {
+      // Ignore errors on logout
+    }
+    set({ user: null, isAuthenticated: false });
+  },
+  checkAuth: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get('/auth/me');
+      if (response.data?.success) {
+        set({ user: response.data.data, isAuthenticated: true, isLoading: false });
+      } else {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+      }
+    } catch (error) {
+      set({ user: null, isAuthenticated: false, isLoading: false });
+    }
+  },
+}));
