@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   role: 'admin' | 'committee' | 'resident';
+  unitId?: string;
 }
 
 export interface LoginPayload {

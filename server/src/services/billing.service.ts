@@ -36,12 +36,7 @@ export class BillingService {
       const existing = await db
         .select()
         .from(maintenanceBills)
-        .where(
-          and(
-            eq(maintenanceBills.unitId, unit.id),
-            eq(maintenanceBills.billingPeriod, data.billingPeriod)
-          )
-        )
+        .where(eq(maintenanceBills.billNumber, billNumber))
         .limit(1);
 
       if (existing.length > 0) {

@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "../services/auth.service";
+import { db } from "../db/db";
+import { residentProfiles } from "../db/schema";
+import { eq } from "drizzle-orm";
 import { AppError } from "../middlewares/errorHandler";
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -65,9 +68,26 @@ export class AuthController {
       res.cookie("accessToken", accessToken, cookieOptionsAccess);
       res.cookie("refreshToken", refreshToken, cookieOptionsRefresh);
 
+      let unitId;
+      if (user.role === "resident") {
+        const profile = await db
+          .select()
+          .from(residentProfiles)
+          .where(eq(residentProfiles.id, user.id))
+          .limit(1);
+        if (profile.length > 0) {
+          unitId = profile[0].unitId;
+        }
+      }
+
       res.status(200).json({
         success: true,
-        data: { user },
+        data: {
+          user: {
+            ...user,
+            ...(unitId && { unitId }),
+          },
+        },
       });
     } catch (error) {
       next(error);
@@ -92,9 +112,26 @@ export class AuthController {
       res.cookie("accessToken", accessToken, cookieOptionsAccess);
       res.cookie("refreshToken", refreshToken, cookieOptionsRefresh);
 
+      let unitId;
+      if (user.role === "resident") {
+        const profile = await db
+          .select()
+          .from(residentProfiles)
+          .where(eq(residentProfiles.id, user.id))
+          .limit(1);
+        if (profile.length > 0) {
+          unitId = profile[0].unitId;
+        }
+      }
+
       res.status(200).json({
         success: true,
-        data: { user },
+        data: {
+          user: {
+            ...user,
+            ...(unitId && { unitId }),
+          },
+        },
       });
     } catch (error) {
       next(error);
@@ -146,10 +183,25 @@ export class AuthController {
         throw new AppError("Not authenticated", 401);
       }
 
+      let unitId;
+      if (req.user.role === "resident") {
+        const profile = await db
+          .select()
+          .from(residentProfiles)
+          .where(eq(residentProfiles.id, req.user.id))
+          .limit(1);
+        if (profile.length > 0) {
+          unitId = profile[0].unitId;
+        }
+      }
+
       res.status(200).json({
         success: true,
         data: {
-          user: req.user,
+          user: {
+            ...req.user,
+            ...(unitId && { unitId }),
+          },
         },
       });
     } catch (error) {

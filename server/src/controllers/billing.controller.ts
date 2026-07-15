@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { BillingService } from "../services/billing.service";
 import { db } from "../db/db";
-import { residentProfiles } from "../db/schema";
+import { residentProfiles, maintenanceBills } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { AppError } from "../middlewares/errorHandler";
 

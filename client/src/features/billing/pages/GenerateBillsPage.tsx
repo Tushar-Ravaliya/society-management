@@ -14,11 +14,7 @@ export function GenerateBillsPage() {
       setIsLoading(true);
       const res = await billingApi.generateBatch(data);
       const resData = res.data.data as any;
-      if (resData.count > 0) {
-        toast.success(`Generated ${resData.count} bills for ${data.billingPeriod}`);
-      } else {
-        toast.info(`No new bills generated - bills already exist for ${data.billingPeriod}`);
-      }
+      toast.success(resData.message || `Generated bills for ${data.billingPeriod}`);
       navigate('/billing');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to generate bills');

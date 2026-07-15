@@ -21,7 +21,7 @@ export const CommitteePage: React.FC = () => {
     try {
       const res = await committeeApi.getMembers();
       if (res.data.success) {
-        setMembers(res.data.data);
+        setMembers(res.data.data.committee || []);
       }
     } catch (err) {
       toast.error('Failed to load committee members');
